@@ -1,0 +1,357 @@
+/* 企业商务配色主题 */
+:root {
+  /* 企业主色调 */
+  --business-navy: #1E3A8A;
+  --business-blue: #3B82F6;
+  --business-gray: #6B7280;
+  --business-light-gray: #9CA3AF;
+  --business-dark: #111827;
+  --business-accent: #059669;
+  
+  /* 渐变色 */
+  --gradient-primary: linear-gradient(135deg, var(--business-navy), var(--business-blue));
+  --gradient-secondary: linear-gradient(135deg, var(--business-gray), var(--business-light-gray));
+  --gradient-success: linear-gradient(135deg, var(--business-accent), var(--business-blue));
+  --gradient-warning: linear-gradient(135deg, #F59E0B, #EF4444);
+  --gradient-danger: linear-gradient(135deg, #EF4444, #DC2626);
+  
+  /* 背景色 */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F9FAFB;
+  --bg-card: #FFFFFF;
+  --bg-hover: #F3F4F6;
+  
+  /* 文字色 */
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-muted: #6B7280;
+  --text-white: #FFFFFF;
+  
+  /* 边框色 */
+  --border-light: #E5E7EB;
+  --border-medium: #D1D5DB;
+  --border-dark: #9CA3AF;
+  
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* 圆角 */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  
+  /* 间距 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  
+  /* 多巴胺颜色系统 */
+  --dopamine-pink: #FF6B9D;
+  --dopamine-pink-light: #FFE1EC;
+  --dopamine-orange: #FF8C42;
+  --dopamine-orange-light: #FFF0E6;
+  --dopamine-yellow: #FFD93D;
+  --dopamine-yellow-light: #FFF9E6;
+  --dopamine-green: #6BCF7F;
+  --dopamine-green-light: #E8F5EA;
+  --dopamine-blue: #4D96FF;
+  --dopamine-blue-light: #E6F0FF;
+  --dopamine-purple: #9B59B6;
+  --dopamine-purple-light: #F0E6F7;
+  --dopamine-red: #FF5757;
+  --dopamine-red-light: #FFE6E6;
+  
+  /* 额外的颜色变量 */
+  --color-primary: var(--business-blue);
+  --color-success: var(--business-accent);
+  --color-warning: var(--dopamine-orange);
+  --color-danger: var(--dopamine-red);
+  --color-info: var(--dopamine-blue);
+  
+  /* 背景变量 */
+  --bg-light: #F8FAFC;
+  --bg-gradient: var(--gradient-primary);
+  
+  /* 边框变量 */
+  --border-color: var(--border-light);
+  
+  /* 紧凑间距系统 */
+  --compact-spacing-xs: 2px;
+  --compact-spacing-sm: 4px;
+  --compact-spacing-md: 8px;
+  --compact-spacing-lg: 12px;
+  
+  /* 紧凑圆角系统 */
+  --compact-radius-sm: 2px;
+  --compact-radius-md: 4px;
+  --compact-radius-lg: 6px;
+}
+
+/* 全局样式重置 */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+/* 多巴胺按钮样式 */
+.dopamine-btn {
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  color: var(--text-white);
+  position: relative;
+  overflow: hidden;
+}
+
+.dopamine-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.dopamine-btn:hover::before {
+  left: 100%;
+}
+
+.dopamine-btn-primary {
+  background: var(--gradient-primary);
+}
+
+.dopamine-btn-secondary {
+  background: var(--gradient-secondary);
+}
+
+.dopamine-btn-success {
+  background: var(--gradient-success);
+}
+
+.dopamine-btn-warning {
+  background: var(--gradient-warning);
+}
+
+.dopamine-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.dopamine-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-md);
+}
+
+/* 多巴胺卡片样式 */
+.dopamine-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-lg);
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-light);
+}
+
+.dopamine-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* 多巴胺输入框样式 */
+.dopamine-input {
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.dopamine-input:focus {
+  outline: none;
+  border-color: var(--business-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* 多巴胺标签样式 */
+.dopamine-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-white);
+}
+
+.dopamine-tag-pink {
+  background: var(--business-gray);
+}
+
+.dopamine-tag-orange {
+  background: var(--business-blue);
+}
+
+.dopamine-tag-yellow {
+  background: var(--business-light-gray);
+  color: var(--text-primary);
+}
+
+.dopamine-tag-green {
+  background: var(--business-accent);
+}
+
+.dopamine-tag-blue {
+  background: var(--business-navy);
+}
+
+.dopamine-tag-purple {
+  background: var(--business-dark);
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.fade-in-down {
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.6s ease-out;
+}
+
+/* Element Plus 主题定制 */
+.el-button--primary {
+  background: var(--gradient-primary);
+  border: none;
+}
+
+.el-button--primary:hover {
+  background: var(--gradient-primary);
+  filter: brightness(1.1);
+}
+
+.el-button--success {
+  background: var(--gradient-success);
+  border: none;
+}
+
+.el-button--warning {
+  background: var(--gradient-warning);
+  border: none;
+}
+
+.el-card {
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+.el-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.el-input__wrapper {
+  border-radius: var(--radius-lg);
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px var(--dopamine-blue);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .dopamine-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  
+  .dopamine-card {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .dopamine-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  
+  .dopamine-card {
+    padding: var(--spacing-sm);
+  }
+}

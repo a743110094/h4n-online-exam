@@ -1,0 +1,83 @@
+{
+  "name": "online-exam-system",
+  "version": "1.0.0",
+  "description": "A comprehensive online examination system with multi-tenant support, AI assistant, and real-time monitoring",
+  "main": "index.js",
+  "scripts": {
+    "dev": "docker-compose up -d",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && go run main.go",
+    "build": "cd frontend && npm run build",
+    "test": "cd frontend && npm run test:unit && cd ../backend && go test ./...",
+    "test:e2e": "cd frontend && npm run test:e2e",
+    "lint": "cd frontend && npm run lint",
+    "format": "cd frontend && npm run format",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "load-test": "cd load-test && ./run-load-tests.sh",
+    "setup": "npm run setup:frontend && npm run setup:backend",
+    "setup:frontend": "cd frontend && npm install",
+    "setup:backend": "cd backend && go mod download",
+    "migrate": "cd backend && go run migrations/migrate.go",
+    "seed": "cd backend && go run seeds/seed.go"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/online-exam-system.git"
+  },
+  "keywords": [
+    "exam",
+    "education",
+    "online-testing",
+    "multi-tenant",
+    "examination-system",
+    "go",
+    "vue3",
+    "typescript",
+    "postgresql",
+    "redis",
+    "docker",
+    "ai-assistant",
+    "real-time-monitoring",
+    "jwt-authentication",
+    "rbac",
+    "performance-optimized"
+  ],
+  "author": "Online Exam System Team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/your-username/online-exam-system/issues"
+  },
+  "homepage": "https://github.com/your-username/online-exam-system#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "workspaces": [
+    "frontend"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "private": false,
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/your-username"
+  },
+  "contributors": [
+    {
+      "name": "Online Exam System Team",
+      "email": "team@online-exam-system.com"
+    }
+  ],
+  "directories": {
+    "doc": "docs",
+    "test": "load-test"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}

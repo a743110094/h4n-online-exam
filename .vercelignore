@@ -1,0 +1,10 @@
+node_modules
+build
+dist
+.git
+.trae
+.log
+backend
+*.db
+*.exe
+online-exam-system
