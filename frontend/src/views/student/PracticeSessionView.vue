@@ -836,7 +836,13 @@ const confirmAnswer = async () => {
     let answer = '';
     
     if (currentQuestion.value.type === 'single' || currentQuestion.value.type === 'judge') {
-      answer = String(answers[questionId] || '');
+      // 对于判断题，需要特殊处理boolean值，确保false也能正确转换为字符串
+      const answerValue = answers[questionId];
+      if (currentQuestion.value.type === 'judge' && typeof answerValue === 'boolean') {
+        answer = String(answerValue);
+      } else {
+        answer = String(answerValue || '');
+      }
     } else if (currentQuestion.value.type === 'multiple') {
       const selectedOptions = answers[questionId] || [];
       answer = Array.isArray(selectedOptions) ? selectedOptions.join(',') : '';
