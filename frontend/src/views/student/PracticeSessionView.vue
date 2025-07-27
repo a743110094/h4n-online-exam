@@ -246,6 +246,19 @@
                 />
               </div>
             </div>
+
+            <!-- 简答题 -->
+            <div v-if="currentQuestion.type === 'essay'" class="essay-input">
+              <el-input
+                v-model="answers[currentQuestion.id]"
+                type="textarea"
+                :rows="6"
+                placeholder="请输入您的答案..."
+                maxlength="1000"
+                show-word-limit
+                resize="none"
+              />
+            </div>
           </div>
 
           <!-- 底部按钮区域 -->
@@ -435,6 +448,8 @@ const hasAnswered = computed(() => {
     return Array.isArray(answer) && answer.length > 0;
   } else if (currentQuestion.value.type === 'fill') {
     return fillAnswers.value.some(ans => ans && ans.trim());
+  } else if (currentQuestion.value.type === 'essay') {
+    return answer !== undefined && answer !== null && answer.trim() !== '';
   }
   
   return false;
@@ -639,6 +654,7 @@ const getTypeText = (type: string): string => {
     multiple: "多选题",
     judge: "判断题",
     fill: "填空题",
+    essay: "简答题",
   };
   return textMap[type] || "";
 };
@@ -650,6 +666,7 @@ const getTypeTagType = (type: string): string => {
     multiple: "success",
     judge: "warning",
     fill: "danger",
+    essay: "info",
   };
   return typeMap[type] || "";
 };
@@ -842,6 +859,8 @@ const confirmAnswer = async () => {
       answer = Array.isArray(selectedOptions) ? selectedOptions.join(',') : '';
     } else if (currentQuestion.value.type === 'fill') {
       answer = fillAnswers.value.filter(ans => ans && ans.trim()).join('|');
+    } else if (currentQuestion.value.type === 'essay') {
+      answer = String(answers[questionId] || '').trim();
     }
     
     // 构造正确的请求格式
@@ -1424,6 +1443,29 @@ const submitPractice = async () => {
   font-weight: 600;
   color: var(--text-primary);
   font-size: 14px;
+}
+
+/* 简答题样式 */
+.essay-input {
+  margin-top: var(--spacing-md);
+}
+
+.essay-input .el-textarea {
+  width: 100%;
+}
+
+.essay-input .el-textarea__inner {
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-color);
+  transition: border-color 0.3s ease;
+  font-family: inherit;
+  line-height: 1.6;
+  resize: none;
+}
+
+.essay-input .el-textarea__inner:focus {
+  border-color: var(--dopamine-blue);
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
 }
 
 .question-navigation {
