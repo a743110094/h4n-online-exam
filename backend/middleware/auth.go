@@ -96,12 +96,15 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// 缓存未命中，解析JWT token
+		fmt.Printf("Parsing token: %s\n", tokenString)
 		claims, err := ParseToken(tokenString)
 		if err != nil {
+			fmt.Printf("Token parse error: %v\n", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
 			return
 		}
+		fmt.Printf("Token parsed successfully: UserID=%d, Username=%s, Role=%s\n", claims.UserID, claims.Username, claims.Role)
 
 		// 缓存token信息
 		cacheService.SetTokenCache(tenantID, tokenHash, claims.UserID, claims.Username, claims.Role)

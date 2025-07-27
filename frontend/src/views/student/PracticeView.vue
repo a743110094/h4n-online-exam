@@ -11,12 +11,13 @@
       <div class="filter-row">
         <div class="filter-item">
           <label>科目</label>
+          {{ subjectOptions }}
           <el-select v-model="filters.subject" placeholder="选择科目" clearable>
             <el-option
-              v-for="subject in subjects"
-              :key="subject.id"
-              :label="subject.name"
-              :value="subject.id"
+              v-for="sbjItem in subjectOptions"
+              :key="sbjItem.value"
+              :label="sbjItem.label"
+              :value="sbjItem.value"
             />
           </el-select>
         </div>

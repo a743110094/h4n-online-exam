@@ -527,9 +527,9 @@ const loadQuestions = async () => {
     }
 
     const response = await getQuestions(params)
-    console.log('API响应数据:', response.data) // 调试日志
-    questions.value = response.data.questions || []
-    totalQuestions.value = response.data.total || 0
+    console.log('API响应数据:', response) // 调试日志
+    questions.value = response?.questions || []
+    totalQuestions.value = response?.total || 0
   } catch (error) {
     console.error('加载题目列表失败:', error)
     ElMessage.error('加载题目列表失败')
@@ -542,7 +542,7 @@ const loadQuestions = async () => {
 const loadSubjects = async () => {
   try {
     const response = await getSubjects()
-    subjects.value = response.data || []
+    subjects.value = response.subjects || []
   } catch (error) {
     console.error('加载科目列表失败:', error)
   }

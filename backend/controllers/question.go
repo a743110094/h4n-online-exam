@@ -78,7 +78,7 @@ func GetQuestions(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, QuestionListResponse{
+	utils.SuccessResponse(c, QuestionListResponse{
 		Questions: questions,
 		Total:     total,
 		Page:      page,

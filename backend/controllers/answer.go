@@ -1,10 +1,13 @@
 package controllers
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 	"online-exam-system/database"
 	"online-exam-system/middleware"
 	"online-exam-system/models"
+	"online-exam-system/services"
 	"online-exam-system/utils"
 	"strconv"
 	"time"
@@ -63,7 +66,7 @@ func SubmitAnswer(c *gin.Context) {
 
 	// 检查考试记录是否存在且状态正确
 	var record models.ExamRecord
-	if err := utils.WithTenant(database.DB, tenantID).Where("exam_id = ? AND student_id = ?", uint(examID), currentUserID).First(&record).Error; err != nil {
+	if err := utils.WithTenant(database.DB, tenantID).Where("exam_id = ? AND user_id = ?", uint(examID), currentUserID).First(&record).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "考试记录不存在"})
 		return
 	}
@@ -147,7 +150,7 @@ func SubmitExam(c *gin.Context) {
 
 	// 检查考试记录是否存在且状态正确
 	var record models.ExamRecord
-	if err := utils.WithTenant(database.DB, tenantID).Where("exam_id = ? AND student_id = ?", uint(examID), currentUserID).First(&record).Error; err != nil {
+	if err := utils.WithTenant(database.DB, tenantID).Where("exam_id = ? AND user_id = ?", uint(examID), currentUserID).First(&record).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "考试记录不存在"})
 		return
 	}
@@ -191,25 +194,49 @@ func SubmitExam(c *gin.Context) {
 		}
 	}
 
-	// 计算成绩
-	score, totalScore := calculateScore(record.ID)
-
-	// 更新考试记录
+	// 更新考试记录状态为已完成
 	now := time.Now()
 	record.EndTime = &now
-	record.Score = &score
 	record.Status = models.ExamCompleted
 
-	if err := database.DB.Save(&record).Error; err != nil {
+	// 只更新状态和结束时间，不覆盖分数字段
+	if err := database.DB.Model(&record).Updates(map[string]interface{}{
+		"end_time": now,
+		"status":   models.ExamCompleted,
+	}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "提交试卷失败"})
 		return
 	}
 
+	// 发送异步消息进行成绩计算和统计更新
+	if rabbitMQService := services.GetRabbitMQService(); rabbitMQService != nil {
+		// 构建答案映射
+		answerMap := make(map[string]string)
+		for _, answerReq := range req.Answers {
+			answerMap[strconv.FormatUint(uint64(answerReq.QuestionID), 10)] = answerReq.Answer
+		}
+		
+		// 将答案映射转换为JSON字符串
+		answersJSON, _ := json.Marshal(answerMap)
+		
+		message := services.ExamResultMessage{
+			ExamID:     uint(examID),
+			UserID:     currentUserID,
+			Answers:    string(answersJSON),
+			TenantID:   strconv.FormatUint(uint64(tenantID), 10),
+			SubmitTime: now,
+		}
+		
+		// 发布到考试结果队列进行异步处理
+		if err := rabbitMQService.PublishExamResult(message); err != nil {
+			// 记录错误但不影响用户体验
+			log.Printf("Failed to publish exam result message: %v", err)
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"message":     "试卷提交成功",
-		"score":       score,
-		"total_score": totalScore,
-		"record":      record,
+		"message": "试卷提交成功，成绩正在计算中",
+		"record":  record,
 	})
 }
 
@@ -227,7 +254,7 @@ func GetExamResult(c *gin.Context) {
 	// 学生只能查看自己的成绩
 	var record models.ExamRecord
 	if currentRole == models.RoleStudent {
-		if err := utils.WithTenant(database.DB, tenantID).Where("exam_id = ? AND student_id = ?", uint(examID), currentUserID).First(&record).Error; err != nil {
+		if err := utils.WithTenant(database.DB, tenantID).Where("exam_id = ? AND user_id = ?", uint(examID), currentUserID).First(&record).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "考试记录不存在"})
 			return
 		}
@@ -245,7 +272,7 @@ func GetExamResult(c *gin.Context) {
 			return
 		}
 
-		if err := utils.WithTenant(database.DB, tenantID).Where("exam_id = ? AND student_id = ?", uint(examID), uint(studentIDUint)).First(&record).Error; err != nil {
+		if err := utils.WithTenant(database.DB, tenantID).Where("exam_id = ? AND user_id = ?", uint(examID), uint(studentIDUint)).First(&record).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "考试记录不存在"})
 			return
 		}
@@ -310,7 +337,7 @@ func GetExamResult(c *gin.Context) {
 	c.JSON(http.StatusOK, ExamResultResponse{
 		Record:       record,
 		Answers:      answerDetails,
-		Score:        getIntValue(record.Score),
+		Score:        int(record.Score),
 		TotalScore:   totalScore,
 		CorrectCount: correctCount,
 		TotalCount:   len(questions),
@@ -336,7 +363,7 @@ func GetStudentAnswers(c *gin.Context) {
 
 	// 检查考试记录是否存在
 	var record models.ExamRecord
-	if err := utils.WithTenant(database.DB, tenantID).Where("exam_id = ? AND student_id = ?", uint(examID), currentUserID).First(&record).Error; err != nil {
+	if err := utils.WithTenant(database.DB, tenantID).Where("exam_id = ? AND user_id = ?", uint(examID), currentUserID).First(&record).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "考试记录不存在"})
 		return
 	}

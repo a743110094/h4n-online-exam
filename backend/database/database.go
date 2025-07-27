@@ -49,6 +49,11 @@ func AutoMigrate() {
 		&models.PracticeRecord{},
 		&models.PracticeAnswer{},
 		&models.PracticeRecommendation{},
+		&models.UserStats{},
+		&models.ExamStats{},
+		&models.ExamReport{},
+		&models.Tenant{},
+		&models.PaperQuestion{},
 	)
 	
 	if err != nil {

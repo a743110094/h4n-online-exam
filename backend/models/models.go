@@ -132,6 +132,17 @@ type Paper struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+// 试卷题目关联模型
+type PaperQuestion struct {
+	ID         uint     `json:"id" gorm:"primaryKey"`
+	PaperID    uint     `json:"paper_id" gorm:"not null"`
+	QuestionID uint     `json:"question_id" gorm:"not null"`
+	Score      float64  `json:"score" gorm:"default:1"` // 题目在该试卷中的分值
+	Order      int      `json:"order" gorm:"default:0"` // 题目顺序
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+}
+
 // 考试模型
 type Exam struct {
 	ID          uint       `json:"id" gorm:"primaryKey"`
@@ -153,21 +164,27 @@ type Exam struct {
 
 // 考试参与记录
 type ExamRecord struct {
-	ID         uint              `json:"id" gorm:"primaryKey"`
-	TenantID   uint              `json:"tenant_id" gorm:"not null;index;default:100"`
-	ExamID     uint              `json:"exam_id" gorm:"not null"`
-	Exam       Exam              `json:"exam" gorm:"foreignKey:ExamID"`
-	StudentID  uint              `json:"student_id" gorm:"not null"`
-	Student    User              `json:"student" gorm:"foreignKey:StudentID"`
-	StartTime  time.Time         `json:"start_time"`
-	EndTime    *time.Time        `json:"end_time"`
-	Score      *int              `json:"score"`
-	TotalScore int               `json:"total_score"`
-	Status     ExamRecordStatus  `json:"status" gorm:"default:'not_started'"`
-	IsFinished bool              `json:"is_finished" gorm:"default:false"`
-	ExtraTime  int               `json:"extra_time" gorm:"default:0"` // 额外时间(分钟)
-	CreatedAt  time.Time         `json:"created_at"`
-	UpdatedAt  time.Time         `json:"updated_at"`
+	ID           uint              `json:"id" gorm:"primaryKey"`
+	TenantID     uint              `json:"tenant_id" gorm:"not null;index;default:100"`
+	ExamID       uint              `json:"exam_id" gorm:"not null"`
+	Exam         Exam              `json:"exam" gorm:"foreignKey:ExamID"`
+	StudentID    uint              `json:"student_id" gorm:"not null"`
+	Student      User              `json:"student" gorm:"foreignKey:StudentID"`
+	UserID       uint              `json:"user_id" gorm:"not null"`
+	User         User              `json:"user" gorm:"foreignKey:UserID"` 
+	Answers      string            `json:"answers" gorm:"type:text"` // JSON格式存储答案
+	Score        float64           `json:"score" gorm:"default:0"`
+	CorrectCount int               `json:"correct_count" gorm:"default:0"`
+	TotalCount   int               `json:"total_count" gorm:"default:0"`
+	SubmitTime   time.Time         `json:"submit_time"`
+	StartTime    time.Time         `json:"start_time"`
+	EndTime      *time.Time        `json:"end_time"`
+	TotalScore   int               `json:"total_score"`
+	Status       ExamRecordStatus  `json:"status" gorm:"default:'not_started'"`
+	IsFinished   bool              `json:"is_finished" gorm:"default:false"`
+	ExtraTime    int               `json:"extra_time" gorm:"default:0"` // 额外时间(分钟)
+	CreatedAt    time.Time         `json:"created_at"`
+	UpdatedAt    time.Time         `json:"updated_at"`
 }
 
 // 答题记录
@@ -253,4 +270,53 @@ type AIChat struct {
 	Response  string    `json:"response" gorm:"type:text"`
 	Context   string    `json:"context" gorm:"type:text"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+// 用户统计模型
+type UserStats struct {
+	ID           uint      `json:"id" gorm:"primaryKey"`
+	TenantID     uint      `json:"tenant_id" gorm:"not null;index;default:100"`
+	UserID       uint      `json:"user_id" gorm:"not null;uniqueIndex:idx_user_tenant"`
+	User         User      `json:"user" gorm:"foreignKey:UserID"`
+	ExamCount    int       `json:"exam_count" gorm:"default:0"`
+	TotalScore   float64   `json:"total_score" gorm:"default:0"`
+	AverageScore float64   `json:"average_score" gorm:"default:0"`
+	HighestScore float64   `json:"highest_score" gorm:"default:0"`
+	LowestScore  float64   `json:"lowest_score" gorm:"default:0"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+// 考试统计模型
+type ExamStats struct {
+	ID               uint      `json:"id" gorm:"primaryKey"`
+	TenantID         uint      `json:"tenant_id" gorm:"not null;index;default:100"`
+	ExamID           uint      `json:"exam_id" gorm:"not null;uniqueIndex:idx_exam_tenant"`
+	Exam             Exam      `json:"exam" gorm:"foreignKey:ExamID"`
+	ParticipantCount int       `json:"participant_count" gorm:"default:0"`
+	AverageScore     float64   `json:"average_score" gorm:"default:0"`
+	HighestScore     float64   `json:"highest_score" gorm:"default:0"`
+	LowestScore      float64   `json:"lowest_score" gorm:"default:0"`
+	PassRate         float64   `json:"pass_rate" gorm:"default:0"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
+}
+
+// 考试报告模型
+type ExamReport struct {
+	ID           uint      `json:"id" gorm:"primaryKey"`
+	TenantID     uint      `json:"tenant_id" gorm:"not null;index;default:100"`
+	ExamID       uint      `json:"exam_id" gorm:"not null"`
+	Exam         Exam      `json:"exam" gorm:"foreignKey:ExamID"`
+	UserID       uint      `json:"user_id" gorm:"not null"`
+	User         User      `json:"user" gorm:"foreignKey:UserID"`
+	Score        float64   `json:"score"`
+	CorrectCount int       `json:"correct_count"`
+	TotalCount   int       `json:"total_count"`
+	PassRate     float64   `json:"pass_rate"`
+	Rank         int       `json:"rank"`
+	ReportData   string    `json:"report_data" gorm:"type:text"` // JSON格式存储详细报告数据
+	GeneratedAt  time.Time `json:"generated_at"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }

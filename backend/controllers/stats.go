@@ -174,14 +174,14 @@ func GetStudentStats(c *gin.Context) {
 	stats := StudentStats{}
 
 	// 基本统计
-	utils.WithTenant(database.DB, tenantID).Model(&models.ExamRecord{}).Where("student_id = ?", currentUserID).Count(&stats.TotalExams)
-	utils.WithTenant(database.DB, tenantID).Model(&models.ExamRecord{}).Where("student_id = ? AND status = ?", currentUserID, models.ExamCompleted).Count(&stats.CompletedExams)
+	utils.WithTenant(database.DB, tenantID).Model(&models.ExamRecord{}).Where("user_id = ?", currentUserID).Count(&stats.TotalExams)
+	utils.WithTenant(database.DB, tenantID).Model(&models.ExamRecord{}).Where("user_id = ? AND status = ?", currentUserID, models.ExamCompleted).Count(&stats.CompletedExams)
 
 	// 平均分和最高分
 	var avgScore sql.NullFloat64
 	var bestScore sql.NullInt64
-	utils.WithTenant(database.DB, tenantID).Model(&models.ExamRecord{}).Where("student_id = ? AND status = ?", currentUserID, models.ExamCompleted).Select("AVG(score)").Scan(&avgScore)
-	utils.WithTenant(database.DB, tenantID).Model(&models.ExamRecord{}).Where("student_id = ? AND status = ?", currentUserID, models.ExamCompleted).Select("MAX(score)").Scan(&bestScore)
+	utils.WithTenant(database.DB, tenantID).Model(&models.ExamRecord{}).Where("user_id = ? AND status = ?", currentUserID, models.ExamCompleted).Select("AVG(score)").Scan(&avgScore)
+	utils.WithTenant(database.DB, tenantID).Model(&models.ExamRecord{}).Where("user_id = ? AND status = ?", currentUserID, models.ExamCompleted).Select("MAX(score)").Scan(&bestScore)
 
 	if avgScore.Valid {
 		stats.AverageScore = avgScore.Float64
@@ -192,7 +192,7 @@ func GetStudentStats(c *gin.Context) {
 
 	// 最近考试记录
 	var recentRecords []models.ExamRecord
-	utils.WithTenant(database.DB, tenantID).Preload("Exam").Preload("Exam.Paper").Preload("Exam.Paper.Subject").Where("student_id = ?", currentUserID).Order("created_at DESC").Limit(5).Find(&recentRecords)
+	utils.WithTenant(database.DB, tenantID).Preload("Exam").Preload("Exam.Paper").Preload("Exam.Paper.Subject").Where("user_id = ?", currentUserID).Order("created_at DESC").Limit(5).Find(&recentRecords)
 
 	for _, record := range recentRecords {
 		stats.RecentExams = append(stats.RecentExams, StudentExamRecord{
@@ -227,7 +227,7 @@ func GetTeacherStats(c *gin.Context) {
 	utils.WithTenant(database.DB, tenantID).Model(&models.Exam{}).Where("created_by = ?", currentUserID).Count(&stats.TotalExams)
 
 	// 参与过考试的学生数
-	utils.WithTenant(database.DB, tenantID).Model(&models.ExamRecord{}).Joins("JOIN exams ON exam_records.exam_id = exams.id").Where("exams.created_by = ?", currentUserID).Distinct("student_id").Count(&stats.TotalStudents)
+	utils.WithTenant(database.DB, tenantID).Model(&models.ExamRecord{}).Joins("JOIN exams ON exam_records.exam_id = exams.id").Where("exams.created_by = ?", currentUserID).Distinct("user_id").Count(&stats.TotalStudents)
 
 	// 最近考试记录
 	stats.RecentExams = getTeacherRecentExams(currentUserID, tenantID)
@@ -332,12 +332,12 @@ func getRecentActivity(tenantID uint) []RecentActivity {
 
 	// 最近完成的考试
 	var recentRecords []models.ExamRecord
-	utils.WithTenant(database.DB, tenantID).Preload("Student").Preload("Exam").Where("status = ?", models.ExamCompleted).Order("end_time DESC").Limit(5).Find(&recentRecords)
+	utils.WithTenant(database.DB, tenantID).Preload("User").Preload("Exam").Where("status = ?", models.ExamCompleted).Order("end_time DESC").Limit(5).Find(&recentRecords)
 	for _, record := range recentRecords {
 		activities = append(activities, RecentActivity{
 			Type:        "exam_completed",
 			Description: "完成了考试: " + record.Exam.Title,
-			UserName:    record.Student.Username,
+			UserName:    record.User.Username,
 			CreatedAt:   *record.EndTime,
 		})
 	}
@@ -361,20 +361,20 @@ func getStudentSubjectStats(studentID uint, tenantID uint) []SubjectStat {
 		utils.WithTenant(database.DB, tenantID).Model(&models.ExamRecord{}).
 			Joins("JOIN exams ON exam_records.exam_id = exams.id").
 			Joins("JOIN papers ON exams.paper_id = papers.id").
-			Where("exam_records.student_id = ? AND papers.subject_id = ? AND exam_records.status = ?", studentID, subject.ID, models.ExamCompleted).
+			Where("exam_records.user_id = ? AND papers.subject_id = ? AND exam_records.status = ?", studentID, subject.ID, models.ExamCompleted).
 			Count(&examCount)
 
 		if examCount > 0 {
 			utils.WithTenant(database.DB, tenantID).Model(&models.ExamRecord{}).
 				Joins("JOIN exams ON exam_records.exam_id = exams.id").
 				Joins("JOIN papers ON exams.paper_id = papers.id").
-				Where("exam_records.student_id = ? AND papers.subject_id = ? AND exam_records.status = ?", studentID, subject.ID, models.ExamCompleted).
+				Where("exam_records.user_id = ? AND papers.subject_id = ? AND exam_records.status = ?", studentID, subject.ID, models.ExamCompleted).
 				Select("AVG(exam_records.score)").Scan(&avgScore)
 
 			utils.WithTenant(database.DB, tenantID).Model(&models.ExamRecord{}).
 				Joins("JOIN exams ON exam_records.exam_id = exams.id").
 				Joins("JOIN papers ON exams.paper_id = papers.id").
-				Where("exam_records.student_id = ? AND papers.subject_id = ? AND exam_records.status = ?", studentID, subject.ID, models.ExamCompleted).
+				Where("exam_records.user_id = ? AND papers.subject_id = ? AND exam_records.status = ?", studentID, subject.ID, models.ExamCompleted).
 				Select("MAX(exam_records.score)").Scan(&bestScore)
 
 			stat := SubjectStat{

@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   # PostgreSQL 数据库
@@ -30,6 +30,28 @@ services:
     restart: unless-stopped
     command: redis-server --appendonly yes
 
+  # RabbitMQ 消息队列
+  rabbitmq:
+    image: 18df28yeoak27u.xuanyuan.run/rabbitmq:3.12-management-alpine
+    container_name: online_exam_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"    # AMQP port
+      - "15672:15672"  # Management UI port
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - exam_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   # 后端应用
   backend:
     build:
@@ -49,12 +71,18 @@ services:
       - REDIS_PORT=6379
       - REDIS_PASSWORD=
       - REDIS_DB=0
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=admin
+      - RABBITMQ_PASSWORD=password
+      - RABBITMQ_VHOST=/
       - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
       - PORT=8080
       - GIN_MODE=release
     depends_on:
       - postgres
       - redis
+      - rabbitmq
     networks:
       - exam_network
     restart: unless-stopped
@@ -80,6 +108,8 @@ volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  rabbitmq_data:
     driver: local
 
 networks:

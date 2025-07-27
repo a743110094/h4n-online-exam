@@ -379,7 +379,7 @@ func GetWrongQuestions(c *gin.Context) {
 	offset := (page - 1) * pageSize
 
 	// 构建查询条件
-	query := utils.WithTenant(database.DB, tenantID).Table("practice_answers").
+	query := database.DB.Table("practice_answers").
 		Select("practice_answers.*, questions.title, questions.content, questions.options, questions.answer as correct_answer, questions.explanation, questions.type, questions.difficulty, subjects.name as subject_name").
 		Joins("JOIN practice_records ON practice_answers.practice_record_id = practice_records.id").
 		Joins("JOIN questions ON practice_answers.question_id = questions.id").
@@ -461,7 +461,7 @@ func StartWrongQuestionReview(c *gin.Context) {
 		questionIDs = req.QuestionIDs
 	} else {
 		// 获取用户的错题
-		query := utils.WithTenant(database.DB, tenantID).Table("practice_answers").
+		query := database.DB.Table("practice_answers").
 			Select("DISTINCT practice_answers.question_id").
 			Joins("JOIN practice_records ON practice_answers.practice_record_id = practice_records.id").
 			Joins("JOIN questions ON practice_answers.question_id = questions.id").

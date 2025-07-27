@@ -22,6 +22,7 @@
 ### 🚀 技术特性
 - **多租户架构**: 支持多机构独立使用
 - **Redis缓存**: 高性能缓存，支持高并发
+- **异步处理**: RabbitMQ消息队列，考试结束后异步计算成绩和统计
 - **AI集成**: 内置AI问答助手
 - **响应式设计**: 支持PC和移动端
 - **Docker部署**: 一键部署，开箱即用
@@ -32,6 +33,7 @@
 ### 后端
 - **框架**: Go + Gin
 - **数据库**: PostgreSQL + Redis
+- **消息队列**: RabbitMQ
 - **ORM**: GORM
 - **认证**: JWT
 - **缓存**: Redis
@@ -66,6 +68,7 @@ docker-compose up -d
 # 等待服务启动完成后访问
 # 前端: http://localhost:5173
 # 后端API: http://localhost:8080
+# RabbitMQ管理界面: http://localhost:15672 (admin/admin123)
 ```
 
 ### 开发环境部署

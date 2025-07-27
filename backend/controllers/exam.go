@@ -153,7 +153,7 @@ func GetStudentExams(c *gin.Context) {
 
 	var records []models.ExamRecord
 	if len(examIDs) > 0 {
-		utils.WithTenant(database.DB, tenantID).Where("exam_id IN ? AND student_id = ?", examIDs, currentUserID).Find(&records)
+		utils.WithTenant(database.DB, tenantID).Where("exam_id IN ? AND user_id = ?", examIDs, currentUserID).Find(&records)
 	}
 
 	// 构建记录映射
@@ -243,7 +243,7 @@ func GetExam(c *gin.Context) {
 		}
 
 		var examRecord models.ExamRecord
-		if err := utils.WithTenant(database.DB, tenantID).Where("exam_id = ? AND student_id = ?", uint(id), currentUserID).First(&examRecord).Error; err == nil {
+		if err := utils.WithTenant(database.DB, tenantID).Where("exam_id = ? AND user_id = ?", uint(id), currentUserID).First(&examRecord).Error; err == nil {
 			record = &examRecord
 		}
 	}
@@ -507,15 +507,17 @@ func StartExam(c *gin.Context) {
 
 	// 检查是否已有考试记录
 	var existingRecord models.ExamRecord
-	if err := database.DB.Where("exam_id = ? AND student_id = ?", uint(id), currentUserID).First(&existingRecord).Error; err == nil {
+	if err := database.DB.Where("exam_id = ? AND user_id = ?", uint(id), currentUserID).First(&existingRecord).Error; err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "已经参加过此考试"})
 		return
 	}
 
 	// 创建考试记录
 	record := models.ExamRecord{
+		TenantID:  tenantID,
 		ExamID:    uint(id),
 		StudentID: currentUserID,
+		UserID:    currentUserID,
 		StartTime: now,
 		Status:    models.ExamInProgress,
 	}
